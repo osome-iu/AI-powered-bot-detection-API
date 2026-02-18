@@ -28,7 +28,7 @@ class BotDetector:
         Initialize the BotDetector with a HuggingFace model.
 
         Args:
-            model_name: HuggingFace model name or path
+            model_name: HuggingFace model name or local path
             threshold: Probability threshold for binary classification (0-1)
         """
         self.model_name = model_name

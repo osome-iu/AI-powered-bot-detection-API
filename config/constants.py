@@ -4,7 +4,7 @@ All parameters can be modified here for easy tuning without code changes.
 """
 
 # Text input constraints
-MIN_TEXT_COUNT = 10  # Minimum number of texts required
+MIN_TEXT_COUNT = 20  # Minimum number of texts required
 
 # Model configuration
 MODEL_NAME = "data/mbert_trained"  # Path to the trained model
