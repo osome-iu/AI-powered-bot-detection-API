@@ -2,8 +2,10 @@
 Core bot detection model using BERT-based HuggingFace models.
 """
 import logging
+import os
+from pathlib import Path
 import torch
-from typing import List, Dict
+from typing import Any, Dict, List
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TextClassificationPipeline
 from config.constants import (
     MIN_TEXT_COUNT,
@@ -38,15 +40,33 @@ class BotDetector:
         torch.set_num_threads(MAX_CPU_CORES)
 
         try:
+            self._validate_model_name(model_name)
             logger.info(f"Loading model: {model_name}")
             tokenizer = AutoTokenizer.from_pretrained(model_name)
             model = AutoModelForSequenceClassification.from_pretrained(model_name)
-            self.pipeline = TextClassificationPipeline(model=model, tokenizer=tokenizer, return_all_scores=True)
+            self.pipeline = TextClassificationPipeline(model=model, tokenizer=tokenizer, top_k=None)
         except Exception as e:
             logger.error(f"Failed to load model: {str(e)}")
             raise ModelLoadError(f"Could not load model {model_name}: {str(e)}")
 
-    def validate_input(self, texts: List[str]) -> Dict[str, any]:
+    @staticmethod
+    def _validate_model_name(model_name: str) -> None:
+        """Raise a clear error when a local model path is configured but missing."""
+        path_hint = any(
+            [
+                model_name.startswith("."),
+                model_name.startswith("/"),
+                os.sep in model_name,
+                model_name.endswith("\\"),
+            ]
+        )
+        if path_hint and not Path(model_name).exists():
+            raise ModelLoadError(
+                f"Configured model path '{model_name}' does not exist. "
+                "Provide a valid local model directory or set MODEL_NAME to a Hugging Face repo id."
+            )
+
+    def validate_input(self, texts: List[str]) -> Dict[str, Any]:
         """
         Validate input texts according to constraints.
 
@@ -103,7 +123,7 @@ class BotDetector:
             logger.error(f"Inference failed: {str(e)}")
             raise InferenceError(f"Model inference failed: {str(e)}")
 
-    def predict(self, texts: List[str]) -> Dict[str, any]:
+    def predict(self, texts: List[str]) -> Dict[str, Any]:
         """
         Predict if texts belong to a bot based on mean probability.
 

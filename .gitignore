@@ -48,11 +48,14 @@ htmlcov/
 *.safetensors
 .cache/
 huggingface/
+models/mbert_trained/
 
 # Environment variables
 .env
+.env.*
 .env.local
 .env.*.local
+!.env.example
 
 # Temporary files
 *.tmp
