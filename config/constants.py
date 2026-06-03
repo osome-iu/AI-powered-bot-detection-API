@@ -8,8 +8,8 @@ import os
 MIN_TEXT_COUNT = 20  # Minimum number of texts required
 
 # Model configuration
-MODEL_NAME = os.getenv("MODEL_NAME", "models/mbert_trained")  # Local model path or Hugging Face repo id
-BOT_PROBABILITY_THRESHOLD = 0.5  # Threshold for binary classification (0-1)
+MODEL_NAME = os.getenv("MODEL_NAME", "trokhymovych/mbert-ai-bot-detector")  # Local model path or Hugging Face repo id
+BOT_PROBABILITY_THRESHOLD = 0.4  # Threshold for binary classification (0-1)
 
 # Resource management
 MAX_CPU_CORES = 4  # Maximum number of CPU cores torch will use for inference

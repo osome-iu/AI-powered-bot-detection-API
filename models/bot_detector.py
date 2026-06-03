@@ -52,15 +52,13 @@ class BotDetector:
     @staticmethod
     def _validate_model_name(model_name: str) -> None:
         """Raise a clear error when a local model path is configured but missing."""
-        path_hint = any(
-            [
-                model_name.startswith("."),
-                model_name.startswith("/"),
-                os.sep in model_name,
-                model_name.endswith("\\"),
-            ]
+        model_path = Path(os.path.expanduser(model_name))
+        path_hint = (
+            model_name.startswith((".", "/", "~"))
+            or "\\" in model_name
+            or (os.sep in model_name and (model_path.exists() or model_path.parent.exists()))
         )
-        if path_hint and not Path(model_name).exists():
+        if path_hint and not model_path.exists():
             raise ModelLoadError(
                 f"Configured model path '{model_name}' does not exist. "
                 "Provide a valid local model directory or set MODEL_NAME to a Hugging Face repo id."
