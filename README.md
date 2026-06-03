@@ -41,23 +41,30 @@ All configuration parameters are defined in `config/constants.py`:
 
 Edit these values to customize the API behavior.
 
-The default model is downloaded automatically by Transformers on first startup:
+The model comes from Hugging Face:
 
 ```bash
-python main.py
+trokhymovych/mbert-ai-bot-detector
 ```
 
-You can also override the model at runtime with an environment variable:
+For development, you can reference the Hugging Face repo id directly. Transformers will download/cache it automatically on first startup:
 
 ```bash
 MODEL_NAME=trokhymovych/mbert-ai-bot-detector python main.py
 ```
 
-To pre-download the model from Hugging Face for offline or repeat deployments:
+For the server, download the model once and run from the local copy so restarts do not depend on Hugging Face availability:
 
 ```bash
 huggingface-cli download trokhymovych/mbert-ai-bot-detector --local-dir models/mbert-ai-bot-detector
 MODEL_NAME=models/mbert-ai-bot-detector python main.py
+```
+
+The deployed server `.env` should use:
+
+```env
+MODEL_NAME=models/mbert-ai-bot-detector
+BOT_PROBABILITY_THRESHOLD=0.4
 ```
 
 If `MODEL_NAME` points to a local path (for example `data/mbert_trained`), that directory must exist.
