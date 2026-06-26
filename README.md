@@ -34,12 +34,40 @@ pip install -r requirements.txt
 All configuration parameters are defined in `config/constants.py`:
 
 - `MIN_TEXT_COUNT` (default: 20): Minimum number of texts required for prediction
-- `BOT_PROBABILITY_THRESHOLD` (default: 0.5): Threshold for binary classification (0-1)
-- `MODEL_NAME` local path to the pretrained model of HuggingFace model to use
+- `BOT_PROBABILITY_THRESHOLD` (default: 0.4): Threshold for binary classification (0-1)
+- `MODEL_NAME` (default: `trokhymovych/mbert-ai-bot-detector`): Hugging Face repo id or local model path
 - `MAX_CPU_CORES` (default: 4): Maximum CPU cores torch will use
 - `BATCH_SIZE` (default: 32): Batch size for model processing
 
 Edit these values to customize the API behavior.
+
+The model comes from Hugging Face:
+
+```bash
+trokhymovych/mbert-ai-bot-detector
+```
+
+For development, you can reference the Hugging Face repo id directly. Transformers will download/cache it automatically on first startup:
+
+```bash
+MODEL_NAME=trokhymovych/mbert-ai-bot-detector python main.py
+```
+
+For the server, download the model once and run from the local copy so restarts do not depend on Hugging Face availability:
+
+```bash
+huggingface-cli download trokhymovych/mbert-ai-bot-detector --local-dir models/mbert-ai-bot-detector
+MODEL_NAME=models/mbert-ai-bot-detector python main.py
+```
+
+The deployed server `.env` should use:
+
+```env
+MODEL_NAME=models/mbert-ai-bot-detector
+BOT_PROBABILITY_THRESHOLD=0.4
+```
+
+If `MODEL_NAME` points to a local path (for example `data/mbert_trained`), that directory must exist.
 
 ## Running the API
 
@@ -83,14 +111,14 @@ Predict if texts belong to a AI-bot.
 ```
 
 **Parameters:**
-- `texts` (required): List of texts to analyze (minimum 10 texts required)
+- `texts` (required): List of texts to analyze (minimum 20 texts required)
 - `is_bot` (boolean): Binary prediction (True = bot, False = human)
 - `confidence` (float): Mean probability score (0-1)
 - `text_scores` (array): Individual scores for each text provided
 - `num_texts` (integer): Number of texts processed
 
 **Error Responses:**
-- `400 Bad Request`: Too few texts (< 10)
+- `400 Bad Request`: Too few texts (< 20)
 - `422 Unprocessable Entity`: Invalid input format
 - `500 Internal Server Error`: Model inference failed
 
@@ -114,7 +142,7 @@ Get current model information.
 ```json
 {
   "model_name": "<>",
-  "threshold": 0.5,
+  "threshold": 0.4,
 }
 ```
 
@@ -142,7 +170,7 @@ Get current model information.
 
 ## How It Works
 
-1. **Input Validation**: Texts are validated (minimum 10 required)
+1. **Input Validation**: Texts are validated (minimum 20 required)
 2. **Inference**: Model runs inference on batches of texts
 3. **Probability Extraction**: Positive class probabilities are extracted
 4. **Aggregation**: Mean probability is calculated across all texts
